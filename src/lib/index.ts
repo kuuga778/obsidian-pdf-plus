@@ -1,7 +1,7 @@
 import { App, Component, EditableFileView, FileView, MarkdownView, Notice, Platform, TFile, TextFileView, View, base64ToArrayBuffer, normalizePath, parseLinktext, requestUrl } from 'obsidian';
 import { CanvasFileData } from 'obsidian/canvas';
 import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
-import { EncryptedPDFError, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRef } from '@cantoo/pdf-lib';
+import { EncryptedPDFError, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRef, ParseSpeeds } from '@cantoo/pdf-lib';
 
 import PDFPlus from 'main';
 import { ColorPalette, ColorPaletteState } from 'color-palette';
@@ -838,7 +838,8 @@ export class PDFPlusLib {
 
     async loadPdfLibDocumentFromArrayBuffer(buffer: ArrayBuffer, readonly: boolean = false): Promise<PDFDocument> {
         try {
-            return await PDFDocument.load(buffer, { ignoreEncryption: readonly });
+            // Larger batches reduce timer overhead while still yielding to the UI.
+            return await PDFDocument.load(buffer, { ignoreEncryption: readonly, parseSpeed: ParseSpeeds.Fast });
         } catch (e) {
             if (e instanceof EncryptedPDFError) {
                 new Notice(`${this.plugin.manifest.name}: The PDF file is encrypted. This plugin currently does not support editing encrypted PDF files.`, 8);

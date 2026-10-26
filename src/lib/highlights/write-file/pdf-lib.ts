@@ -85,7 +85,8 @@ export class PdfLibIO extends PDFPlusLibSubmodule implements IPdfIo {
 
         const ret = await fn(pdfDoc);
 
-        await this.app.vault.modifyBinary(file, await pdfDoc.save());
+        // Keep saves cooperative without yielding after every 50 objects.
+        await this.app.vault.modifyBinary(file, await pdfDoc.save({ objectsPerTick: 500 }));
         return ret;
     }
 
